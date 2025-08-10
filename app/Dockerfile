@@ -16,10 +16,10 @@ CMD ["python", "app.py"]
 # docker tag tasknest-api samir3112/tasknest-api:latest
 # docker push samir3112/tasknest-api:latest
 # docker ps
-# curl http://localhost:5000/
-# curl http://localhost:5000/tasks
-# curl -X POST http://localhost:5000/tasks -H "Content-Type: application/json" -d '{"title": "Learn Docker", "description": "Build and run containers"}'
-# curl http://localhost:5000/tasks
+# curl http://<ip-address>
+# curl http://<ip-address>/tasks
+# curl -X POST http://<ip-address>/tasks -H "Content-Type: application/json" -d '{"title": "Learn Docker", "description": "Build and run containers"}'
+# curl http://<ip-address>/tasks
 
 # Install Terraform
 # sudo apt update , sudo apt install awscli -y, aws configure
