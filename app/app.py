@@ -1,49 +1,66 @@
 from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
 
-tasks = []
-task_id = 1
+# Load DB credentials from env vars
+db_user = os.getenv("DB_USER")
+db_pass = os.getenv("DB_PASS")
+db_host = os.getenv("DB_HOST")
+db_name = os.getenv("DB_NAME")
 
+# Set SQLAlchemy connection string
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Model
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(500), nullable=True)
+    done = db.Column(db.Boolean, default=False)
+
+# Route
 @app.route('/')
 def home():
-    return "Welcome to TaskNest ToDo API!"
+    return "Welcome to TaskNest ToDo API with RDS MySQL!"
 
 @app.route('/tasks', methods=['GET', 'POST'])
-def handle_tasks():
-    global task_id
+def tasks_handler():
     if request.method == 'POST':
         data = request.get_json()
-        task = {
-            'id': task_id,
-            'title': data['title'],
-            'description': data.get('description', ''),
-            'done': False
-        }
-        tasks.append(task)
-        task_id += 1
-        return jsonify(task), 201
-    return jsonify(tasks)
+        task = Task(title=data['title'], description=data.get('description', ''))
+        db.session.add(task)
+        db.session.commit()
+        return jsonify({"message": "Task created"}), 201
+
+    tasks = Task.query.all()
+    return jsonify([{"id": t.id, "title": t.title, "description": t.description, "done": t.done} for t in tasks])
 
 @app.route('/tasks/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def task_by_id(id):
-    task = next((t for t in tasks if t['id'] == id), None)
-    if not task:
-        return jsonify({'error': 'Task not found'}), 404
+    task = Task.query.get_or_404(id)
 
     if request.method == 'GET':
-        return jsonify(task)
+        return jsonify({"id": task.id, "title": task.title, "description": task.description, "done": task.done})
+
     elif request.method == 'PUT':
         data = request.get_json()
-        task.update({
-            'title': data.get('title', task['title']),
-            'description': data.get('description', task['description']),
-            'done': data.get('done', task['done'])
-        })
-        return jsonify(task)
+        task.title = data.get('title', task.title)
+        task.description = data.get('description', task.description)
+        task.done = data.get('done', task.done)
+        db.session.commit()
+        return jsonify({"message": "Task updated"})
+
     elif request.method == 'DELETE':
-        tasks.remove(task)
-        return jsonify({'message': 'Task deleted'})
+        db.session.delete(task)
+        db.session.commit()
+        return jsonify({"message": "Task deleted"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True, host="0.0.0.0")
