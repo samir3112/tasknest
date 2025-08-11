@@ -15,7 +15,15 @@ docker run -d -p 80:5000 \
   samir3112/tasknest-api
 
 # chmod 400 ~/tasknest/terraform/n-varginia.pem (Permission)
-# ssh -i n-varginia.pem ec2-user@<ec2-public-ip>
+# ssh -i ~/.ssh/n-varginia.pem ec2-user@<EC2_PUBLIC_IP>
 # docker ps
 # docker ps -a (for all containers)
 # curl http://<ip-address-ec2>/tasks
+# curl -X POST http://<ip-address>/tasks -H "Content-Type: application/json" -d '{"title": "Learn Docker", "description": "Build and run containers"}'
+
+# sudo yum install -y mariadb105  OR   1) sudo apt update  2) sudo apt install mysql-client -y
+#  mysql -h <rds_endpoint> -u admin -p
+# SHOW DATABASES
+# USE contactdb;
+# SHOW TABLES;
+# SELECT * FROM contact;
