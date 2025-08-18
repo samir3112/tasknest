@@ -136,7 +136,61 @@ resource "aws_db_subnet_group" "db_subnet" {
   description = "Managed by Terraform"
 }
 
+# S3 Bucket
+resource "random_id" "suffix" {
+  byte_length = 4  
+}
 
+resource "aws_s3_bucket" "tasknest_bucket" {
+  bucket = "tasknest-bucket-${random_id.suffix.hex}"
+  force_destroy = true
+
+  tags = {
+    Name = "tasknest-s3"
+  }  
+}
+
+# IAM Role for EC2 -> S3
+resource "aws_iam_role" "ec2_role" {
+  name = "tasknest-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "s3_policy" {
+  name = "tasknest-s3-policy"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["s3:*"]
+        Effect   = "Allow"
+        Resource = [
+          aws_s3_bucket.tasknest_bucket.arn,
+          "${aws_s3_bucket.tasknest_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "taskknest-ec2-profile"
+  role = aws_iam_role.ec2_role.name
+}
+
+# EC2 Instance
 resource "aws_instance" "tasknest_ec2" {
   ami                         = var.ami_id  # Ubuntu 22.04 LTS
   instance_type               = var.instance_type
@@ -145,8 +199,11 @@ resource "aws_instance" "tasknest_ec2" {
   vpc_security_group_ids      = [aws_security_group.tasknest_sg.id]
   key_name                    = var.key_name
 
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+
   user_data = templatefile("${path.module}/init.sh", {
     db_endpoint = aws_db_instance.tasknest_rds.address
+    bucket_name = aws_s3_bucket.tasknest_bucket.bucket
   })
  
 
