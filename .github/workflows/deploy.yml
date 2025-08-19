@@ -19,8 +19,8 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-          docker stop $(docker ps -q)
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} << EOF
+          docker stop $(docker ps -q) || true
           docker pull samir3112/tasknest-api
           docker run -d --restart always --name tasknest -p 80:5000 \
               -e DB_USER=admin \
