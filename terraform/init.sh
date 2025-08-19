@@ -40,3 +40,10 @@ docker run -d --restart always -p 80:5000 \
 # USE contactdb;
 # SHOW TABLES;
 # SELECT * FROM contact;
+
+
+# NEW METHOD
+# terraform apply -auto-approve
+# chmod +x update-github-secrets.sh ( For first time )
+# ./update-github-secrets.sh
+# git add .      git commit -m "My changes for Day 4/5"    git push origin main

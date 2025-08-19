@@ -1,0 +1,60 @@
+name: CD - Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Write SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          chmod 400 key.pem
+
+      # If your DockerHub image is PUBLIC, you don't need to login.
+      # If PRIVATE, uncomment this block and add DOCKER_USERNAME/DOCKER_PASSWORD secrets.
+      # - name: Docker login (only if your image is private)
+      #   run: |
+      #     echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+
+            echo "[1/4] Stopping & removing old container (if any)..."
+            CID=$(docker ps -aq --filter "name=tasknest")
+            if [ -n "$CID" ]; then
+              docker stop $CID || true
+              docker rm $CID || true
+            fi
+
+            echo "[2/4] Pulling latest image..."
+            docker pull ${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest || docker pull samir3112/tasknest-api:latest
+
+            # Pick the image: prefer your username secret; fallback to 'samir3112'
+            IMAGE="${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest"
+            if ! docker image inspect "$IMAGE" > /dev/null 2>&1; then
+              IMAGE="samir3112/tasknest-api:latest"
+            fi
+
+            echo "[3/4] Running new container..."
+            docker run -d --restart always --name tasknest -p 80:5000 \
+              -e DB_USER=admin \
+              -e DB_PASS=password123 \
+              -e DB_HOST=${{ secrets.RDS_ENDPOINT }} \
+              -e DB_NAME=tasknestdb \
+              -e S3_BUCKET=${{ secrets.S3_BUCKET }} \
+              -e AWS_REGION=us-east-1 \
+              "$IMAGE"
+
+            echo "[4/4] Deployed. Recent logs:"
+            sleep 3
+            docker logs --tail 50 tasknest || true
+          EOF
