@@ -59,8 +59,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest -f app/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest -f app/Dockerfile ./app
+
 
 
       # ---- Trivy scan ----
