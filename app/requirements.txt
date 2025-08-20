@@ -3,3 +3,6 @@ Werkzeug<3.0
 flask_sqlalchemy
 pymysql
 boto3
+pytest
+pytest-cov
+coverage
