@@ -28,6 +28,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/app
           pytest --cov=app --cov-report=xml:coverage.xml
 
       # ---- SonarCloud Scan ----
@@ -36,6 +37,16 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.python.version=3.11
+            -Dsonar.sources=.
+            -Dsonar.tests=tests
+            -Dsonar.exclusions=**/venv/**,**/.venv/**,**/tests/**,**/build/**,**/dist/**
+            -Dsonar.test.inclusions=tests/**/*.py
+            -Dsonar.coverageReportPaths=coverage.xml
 
       # ---- Docker build ----
       - name: Set up Docker Buildx
@@ -57,7 +68,7 @@ jobs:
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest
           format: 'table'
-          exit-code: '1'
+          exit-code: '1'           # fail if HIGH/CRITICAL found
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'HIGH,CRITICAL'
