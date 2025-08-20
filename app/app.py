@@ -63,7 +63,7 @@ def task_detail(id):
         db.session.commit()
         return jsonify({'message': 'Task deleted'})
 
-# ✅ Export tasks to S3
+#  Export tasks to S3
 @app.route('/export', methods=['GET'])
 def export_tasks():
     tasks = Task.query.all()
