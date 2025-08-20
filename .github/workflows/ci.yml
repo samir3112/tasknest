@@ -46,7 +46,7 @@ jobs:
             -Dsonar.tests=tests
             -Dsonar.exclusions=**/venv/**,**/.venv/**,**/build/**,**/dist/**
             -Dsonar.test.inclusions=tests/**/*.py
-            -Dsonar.coverageReportPaths=coverage.xml
+            -Dsonar.python.coverage.reportPaths=coverage.xml   # ✅ FIXED
 
       # ---- Docker build ----
       - name: Set up Docker Buildx
