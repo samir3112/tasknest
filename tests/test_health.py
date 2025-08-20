@@ -1,5 +1,5 @@
 import pytest
-from app import application   # import the exposed application
+from app.app import application   # ✅ point to app/app.py
 
 @pytest.fixture
 def client():
