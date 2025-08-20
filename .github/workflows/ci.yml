@@ -44,9 +44,9 @@ jobs:
             -Dsonar.python.version=3.11
             -Dsonar.sources=app
             -Dsonar.tests=tests
-            -Dsonar.exclusions=**/venv/**,**/.venv/**,**/build/**,**/dist/**
             -Dsonar.test.inclusions=tests/**/*.py
-            -Dsonar.python.coverage.reportPaths=coverage.xml   # ✅ FIXED
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.exclusions=**/venv/**,**/.venv/**,**/build/**,**/dist/**
 
       # ---- Docker build ----
       - name: Set up Docker Buildx
@@ -68,7 +68,7 @@ jobs:
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest
           format: 'table'
-          exit-code: '1'           # fail if HIGH/CRITICAL found
+          exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'HIGH,CRITICAL'
