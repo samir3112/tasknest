@@ -60,7 +60,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/tasknest-api:latest -f app/Dockerfile .
+
 
       # ---- Trivy scan ----
       - name: Scan with Trivy (fail on HIGH/CRITICAL)
