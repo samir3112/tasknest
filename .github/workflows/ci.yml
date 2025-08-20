@@ -42,9 +42,9 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORG }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.python.version=3.11
-            -Dsonar.sources=.
+            -Dsonar.sources=app
             -Dsonar.tests=tests
-            -Dsonar.exclusions=**/venv/**,**/.venv/**,**/tests/**,**/build/**,**/dist/**
+            -Dsonar.exclusions=**/venv/**,**/.venv/**,**/build/**,**/dist/**
             -Dsonar.test.inclusions=tests/**/*.py
             -Dsonar.coverageReportPaths=coverage.xml
 
