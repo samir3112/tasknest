@@ -118,6 +118,31 @@ GET /export → Export tasks to S3 as CSV
 | `RDS_ENDPOINT`    | Updated via script              |
 | `EC2_KEY`         | Your PEM file contents (base64) |
 
+## 🖼️ Screenshots
+
+
+* ✅ App running on EC2, RDS & S3
+
+![EC2](./screenshots/Ec2.png)
+
+
+![S3](./screenshots/S3.png)
+
+
+![RDS](./screenshots/RDS.png)
+
+* ✅ Check in SonarQube
+
+![SonarQube](./screenshots/SonarQube.png)
+
+
+* ✅ GitHub Actions workflow
+
+![CI](./screenshots/Github.png)
+
+---
+
+
 💡 What I Learned
 
 Through this project, I gained hands-on experience in:
